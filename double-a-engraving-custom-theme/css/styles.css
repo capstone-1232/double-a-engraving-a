@@ -1,0 +1,117 @@
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+ }
+
+ .site-branding img {
+    max-width: 500px;
+    max-height: 50px; 
+}
+
+.main-navigation{
+    display: flex;
+    justify-content: end;
+}
+
+
+.main-navigation li {
+    margin-right: 20px;
+}
+
+.main-navigation li:last-child {
+    margin-right: 0px;
+}
+
+.main-navigation li a {
+    text-decoration: none;
+}
+
+.banner {
+    background-color: #000;
+    color: #fff;
+    padding-top: 5rem;
+}
+
+.banner-logo {
+    text-align: center;
+}
+
+.banner-logo a:last-of-type,
+.banner-aboutme a,
+.wording a {
+    text-decoration: none;
+    color: #a63446;
+    border: #a63446 solid 2px;
+    border-radius: 5px;
+    padding: 0.5rem 2rem;
+    text-align: center;
+}
+
+.banner-logo a:last-of-type:hover,
+.banner-aboutme a:hover,
+.wording a {
+    color: #d58936;
+    border: #d58936 solid 2px;
+}
+
+.shadow {
+    box-shadow: inset #a63446 0px 0px 10px 0px, inset #a63446 0px 0px 10px 0px, inset #a63446 0px 0px 36px -24px;
+}
+
+.shadow:hover {
+    box-shadow: inset #d58936 0px 0px 25px 0px, inset #d58936 0px 0px 25px 0px, inset #d58936 0px 0px 36px -24px;
+}
+
+.banner-aboutme {
+    padding: 1rem;
+    margin: 2rem;
+    border: #fff solid 1px;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+}
+
+.banner-aboutme div {
+    text-align: center;
+}
+
+.banner-aboutme a {
+    padding: 0.5rem 7rem;
+    width: 50%;
+}
+
+.flex {
+    display: flex;
+    position: relative;
+}
+
+.wording p{
+    display: grid;
+    place-content: center;
+}
+
+.wording div {
+    display: flex;
+    justify-content: end;
+}
+
+.flex a {
+    width: 50%;
+}
+
+.featured-image {
+    width: 500px;
+    height: auto;
+}
+
+.featured-image div {
+    width: 500px;
+    height: 172px;
+    display: flex;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 275px;
+    opacity: 0.5;
+}
