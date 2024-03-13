@@ -183,3 +183,64 @@ function enqueue_custom_styles() {
 add_action('wp_enqueue_scripts', 'enqueue_custom_styles');
 
 
+
+
+
+add_action('admin_post_custom_contact_form', 'handle_custom_contact_form');
+add_action('admin_post_nopriv_custom_contact_form', 'handle_custom_contact_form');
+
+function handle_custom_contact_form() {
+    $name = sanitize_text_field($_POST['name']);
+    $email = sanitize_email($_POST['email']);
+    $phone = sanitize_text_field($_POST['phone']);
+    $message = sanitize_textarea_field($_POST['message']);
+    $materials = sanitize_text_field($_POST['materials']);
+    $finish = sanitize_text_field($_POST['finish']);
+    $deliver = sanitize_text_field($_POST['deliver']);
+
+    $to = 'speedybatm12@gmail.com';
+    $subject = 'New Custom Form Submission';
+    $body = "Name: $name\nEmail: $email\nPhone: $phone\nMessage: $message\nMaterials: $materials\nFinish: $finish\nDelivery Method: $deliver";
+
+    $attachments = array();
+
+    if (!empty($_FILES['reference']['tmp_name'])) {
+        $reference = $_FILES['reference'];
+        $upload_overrides = array('test_form' => false);
+        $movefile = wp_handle_upload($reference, $upload_overrides);
+        if ($movefile && !isset($movefile['error'])) {
+            $attachment = $movefile['file'];
+            $attachments[] = $attachment;
+        }
+    }
+
+	if (isset($_POST['selectedImages']) && is_array($_POST['selectedImages'])) {
+        foreach ($_POST['selectedImages'] as $imageUrl) {
+            $fileName = basename($imageUrl);
+            $imageContents = file_get_contents($imageUrl);
+            if ($imageContents !== false) {
+                $upload_dir = wp_upload_dir();
+                $file_path = $upload_dir['path'] . '/' . $fileName;
+                file_put_contents($file_path, $imageContents);
+                $attachments[] = $file_path;
+            }
+        }
+    }
+
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    $result = wp_mail($to, $subject, $body, $headers, $attachments);
+
+	foreach ($attachments as $attachment) {
+        @unlink($attachment);
+    }
+
+    if ($result) {
+        echo '<p>Message sent successfully!</p>';
+    } else {
+        echo '<p>Failed to send message. Please try again later.</p>';
+    }
+    exit;
+}
+
+

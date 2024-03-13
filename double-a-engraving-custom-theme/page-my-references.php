@@ -12,9 +12,28 @@
  * @package double-a-engraving-custom-theme
  */
 
+session_start();
+$selectedImages = isset($_SESSION['selected_images']) ? $_SESSION['selected_images'] : array();
+
 get_header();
 ?>
+<div id="imageContainer"></div>
 
-This is the Reference Info page
+<script>
+const selectedImagesJSON = sessionStorage.getItem('selected_images');
+const selectedImages = JSON.parse(selectedImagesJSON);
+
+const imageContainer = document.getElementById('imageContainer');
+
+selectedImages.forEach(imageUrl => {
+    if (imageUrl !== 'undefined') {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = 'Image';
+        imageContainer.appendChild(img);
+    }
+});
+</script>
+
 
 <?php get_footer() ?>
