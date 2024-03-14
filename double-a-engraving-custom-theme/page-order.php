@@ -1,73 +1,103 @@
 <?php
 /**
- * The main template file
+ * Template Name: Custom Form Template
  *
- * This is the most generic template file in a WordPress theme
- * and one of the two required files for a theme (the other being style.css).
- * It is used to display a page when nothing more specific matches a query.
- * E.g., it puts together the home page when no home.php file exists.
- *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
+ * This template is used to display a custom form.
  *
  * @package double-a-engraving-custom-theme
  */
 
+ session_start();
+ $selectedImages = isset($_SESSION['selected_images']) ? $_SESSION['selected_images'] : array();
+
 get_header();
 ?>
 
-<div>
-    <div id="primary" class="content-area">
-        <main id="main" class="site-main" role="main">
-    
-            <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                <div class="entry-content">
-                    <?php
-                    acf_form(array(
-                        'post_id'       => 'new_post',
-                        'new_post'      => array(
-                            'post_type'   => 'post',
-                            'post_status' => 'publish'
-                        ),
-                        'submit_value'  => false,
-                        'field_groups'  => array('group_65df948748c23')
-                    ));
-                    ?>
-                    <div class="order">
-                        <?php
-                        acf_form(array(
-                            'post_id'       => 'new_post',
-                            'new_post'      => array(
-                                'post_type'   => 'post',
-                                'post_status' => 'publish'
-                            ),
-                            'submit_value'  => false,
-                            'field_groups'  => array('group_65df95adbdaa1')
-                        ));
-                        ?>
-                        <button id="addFieldGroupButton">Add Field Group</button>
-                    </div>
-                </div>
-            </article>
-    
-        </main>
+<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="custom_contact_form">
+    <div>
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name">
     </div>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var addFieldGroupButton = document.getElementById("addFieldGroupButton");
-            var entryContent = document.querySelector(".order");
-            var counter = 0;
-    
-            addFieldGroupButton.addEventListener("click", function() {
-                counter++;
-    
-                if (counter === 1) {
-                    var clonedFieldGroup = entryContent.querySelector(".acf-form").cloneNode(true);
-                    entryContent.insertBefore(clonedFieldGroup, addFieldGroupButton);
-                }
-            });
-        });
-    </script>
-</div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email">
+    </div>
+    <div>
+        <label for="phone">Phone Number:</label>
+        <input type="tel" name="phone" id="phone">
+    </div>
+    <div>
+            <label for="reference">Upload Image</label>
+            <input type="file" name="reference" id="reference">
+    </div>
+    <div>
+        <p>Select image(s):</p>
+        <div class="imageContainer">
+            <?php foreach ($selectedImages as $imageUrl) { ?>
+            <label class="imageCheckbox">
+                <input type="checkbox" name="selectedImages[]" value="<?php echo $imageUrl; ?>">
+                <img src="<?php echo $imageUrl; ?>" alt="Image">
+            </label>
+            <?php } ?>
+        </div>
+    </div>
+    <div>
+        <label for="message">Message:</label>
+        <textarea name="message" id="message" rows="5"></textarea>
+    </div>
+    <div>
+        <label for="materials">Materials</label>
+        <select name="materials" id="materials">
+            <option value="oak-Wood">Oak Wood</option>
+            <option value="metal">Metal</option>
+            <option value="glass">Glass</option>
+            <option value="mirror">Mirror</option>
+        </select>
+    </div>
+    <div>
+        <label for="finish">Finishes</label>
+        <select name="finish" id="finish">
+            <option value="wax">Wax</option>
+            <option value="oil">Oil</option>
+            <option value="stain">Stain</option>
+            <option value="dye">Dye</option>
+        </select>
+    </div>
+    <div>
+        <label for="deliver">Delivery Method</label>
+        <select name="deliver" id="deliver">
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pickup</option>
+            <option value="mail">Mail</option>
+        </select>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</form>
 
-<?php get_footer() ?>
+<div id="contact-form-message"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectedImagesJSON = sessionStorage.getItem('selected_images');
+        const selectedImages = JSON.parse(selectedImagesJSON);
+
+        const imageContainer = document.querySelector('.imageContainer');
+
+        selectedImages.forEach(imageUrl => {
+            if (imageUrl !== 'undefined') {
+                const label = document.createElement('label');
+                label.classList.add('imageCheckbox');
+                label.innerHTML = `
+                    <input type="checkbox" name="selectedImages[]" value="${imageUrl}">
+                    <img src="${imageUrl}" alt="Image">
+                `;
+                imageContainer.appendChild(label);
+            }
+        });
+    });
+</script>
+
+<?php get_footer(); ?>
