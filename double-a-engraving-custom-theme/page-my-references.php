@@ -25,12 +25,24 @@ const selectedImages = JSON.parse(selectedImagesJSON);
 
 const imageContainer = document.getElementById('imageContainer');
 
-selectedImages.forEach(imageUrl => {
+selectedImages.forEach((imageUrl, index) => {
     if (imageUrl !== 'undefined') {
+        const imgContainer = document.createElement('div');
         const img = document.createElement('img');
+        const closeButton = document.createElement('button');
+
         img.src = imageUrl;
         img.alt = 'Image';
-        imageContainer.appendChild(img);
+        closeButton.textContent = 'Remove';
+        closeButton.addEventListener('click', function() {
+            selectedImages.splice(index, 1);
+            sessionStorage.setItem('selected_images', JSON.stringify(selectedImages));
+            imgContainer.remove();
+        });
+
+        imgContainer.appendChild(img);
+        imgContainer.appendChild(closeButton);
+        imageContainer.appendChild(imgContainer);
     }
 });
 </script>

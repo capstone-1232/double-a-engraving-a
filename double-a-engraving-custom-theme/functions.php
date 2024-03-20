@@ -176,11 +176,6 @@ if ( defined( 'JETPACK__VERSION' ) ) {
 	require get_template_directory() . '/inc/jetpack.php';
 }
 
-function enqueue_custom_styles() {
-    // Enqueue the stylesheet
-    wp_enqueue_style('custom-styles', get_template_directory_uri() . '/css/styles.css', array(), '1.0', 'all');
-}
-add_action('wp_enqueue_scripts', 'enqueue_custom_styles');
 
 
 
@@ -223,7 +218,6 @@ function handle_custom_contact_form() {
         }
 
         foreach ($_POST['selectedImages'] as $imageUrl) {
-            // Copy the image to the temporary directory
             $image_path = str_replace(home_url(), ABSPATH, $imageUrl);
             $image_name = basename($image_path);
             $copied_image_path = $temp_dir . $image_name;
@@ -238,15 +232,16 @@ function handle_custom_contact_form() {
 
     $result = wp_mail($to, $subject, $body, $headers, $attachments);
 
-    // Cleanup temporary files
     foreach ($attachments as $attachment) {
         @unlink($attachment);
     }
 
     if ($result) {
         echo '<p>Message sent successfully!</p>';
+		wp_redirect(home_url('/?status=success'));
     } else {
         echo '<p>Failed to send message. Please try again later.</p>';
+		wp_redirect(home_url('/?status=error'));
     }
     exit;
 }

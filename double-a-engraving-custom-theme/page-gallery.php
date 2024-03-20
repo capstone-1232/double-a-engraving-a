@@ -138,85 +138,86 @@ var modalImg = document.getElementById("modalImage");
 var addToCartButton = document.querySelector(".modal-content button");
 var checkboxes = document.querySelectorAll("#category-filter input[type='checkbox']");
 
+
 document.addEventListener("DOMContentLoaded", function() {
     const checkboxes = document.querySelectorAll("#category-filter input[type='checkbox']");
     
-    // Update checkboxes based on the category parameter in the URL
+
     const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = urlParams.get('category');
     if (categoryParam) {
-        const selectedCategories = categoryParam.split(',');
+      const selectedCategories = categoryParam.split(',');
         selectedCategories.forEach(category => {
             const checkbox = document.getElementById(category);
             if (checkbox) {
-                checkbox.checked = true;
+              checkbox.checked = true;
             }
-        });
-    }
-    
-    // Add event listener to each checkbox
-    checkboxes.forEach(function(checkbox) {
-        checkbox.addEventListener('change', function(event) {
-            filterPosts(); // Call filterPosts when checkbox state changes
-            updateURL(); // Update URL based on selected categories
-        });
-    });
-
-    // Call filterPosts initially to apply filtering based on category parameter
-    filterPosts();
-
-    function filterPosts() {
+          });
+        }
+        
+        checkboxes.forEach(function(checkbox) {
+          checkbox.addEventListener('change', function(event) {
+            filterPosts();
+            updateURL();
+          });
+        }); 
+        
+        filterPosts();
+        
+        function filterPosts() {
         var selectedCategories = [];
         checkboxes.forEach(function(checkbox) {
-            if (checkbox.checked) {
-                selectedCategories.push(checkbox.value);
-            }
+          if (checkbox.checked) {
+            selectedCategories.push(checkbox.value);
+          }
         });
-
+        
         var posts = document.querySelectorAll('.entry-content');
         posts.forEach(function(post) {
-            var postCategories = post.classList;
-            var display = 'none';
-            if (selectedCategories.length === 0) {
-                display = 'block';
-            } else {
-                selectedCategories.forEach(function(category) {
-                    if (postCategories.contains('category-' + category)) {
-                        display = 'block'; 
-                    }
-                });
-            }
-            post.style.display = display;
+          var postCategories = post.classList;
+          var display = 'none';
+          if (selectedCategories.length === 0) {
+            display = 'block';
+          } else {
+            selectedCategories.forEach(function(category) {
+              if (postCategories.contains('category-' + category)) {
+                display = 'block'; 
+              }
+            });
+          }
+          post.style.display = display;
         });
-    }
-
-    function updateURL() {
+      }
+      
+      function updateURL() {
         var selectedCategories = [];
         checkboxes.forEach(function(checkbox) {
-            if (checkbox.checked) {
+          if (checkbox.checked) {
                 selectedCategories.push(checkbox.value);
             }
         });
         var url = window.location.href.split('?')[0];
         if (selectedCategories.length > 0) {
-            url += '?category=' + selectedCategories.join(',');
+          url += '?category=' + selectedCategories.join(',');
         } else {
-            // If no categories are selected, remove the category parameter from the URL
-            url = window.location.pathname;
+          url = window.location.pathname;
         }
         window.history.replaceState(null, null, url);
-    }
+      }
+    
+      checkboxes.forEach(function(check) {
+          check.addEventListener('change', function(event) {
+              console.log('checked');
+              window.location.reload();
+              check.removeEventListener('change', arguments.callee);
+          });
+      });
 
-});
-
-
-
-
-
-
-// ********************* Modal + Add to Cart ******************************** \\
-for (var i = 0; i < img.length; i++) {
-  img[i].onclick = function(){
+      
+});  
+    // ********************* Modal + Add to Cart ******************************** \\
+    for (var i = 0; i < img.length; i++) {
+      img[i].onclick = function(){
     modal.style.display = "block";
     modalImg.src = this.src;
   }

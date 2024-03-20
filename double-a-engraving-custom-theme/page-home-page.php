@@ -14,6 +14,24 @@
 
 get_header();
 ?>
+
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    
+    <p>Form Successfully sent</p>
+    <?php
+     $page = get_page_by_path('gallery');
+     if ($page) {
+         $page_id = $page->ID;
+     } else {
+     }
+    ?>
+    <a href="<?php echo esc_url(get_permalink($page_id));?>">Explore Gallery</a>
+    <button class="close">Back to Homepage</button>
+  </div>
+</div>
+
+
 <div class="banner bg-image">
     <div class="banner-logo">
         <?php the_custom_logo(); ?>
@@ -190,6 +208,30 @@ if ($custom_query->have_posts()) {
 
 wp_reset_postdata();
 ?>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get('status');
+
+  if (status === 'success') {
+    const modal = document.getElementById('myModal');
+    const closeModal = modal.querySelector('.close');
+
+    modal.style.display = "block";
+
+    closeModal.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+  }
+});
+</script>
 
 <?php
 get_footer();

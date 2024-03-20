@@ -8,12 +8,13 @@
  */
 
  session_start();
- $selectedImages = isset($_SESSION['selected_images']) ? $_SESSION['selected_images'] : array();
+ $selectedImages = isset ($_SESSION['selected_images']) ? $_SESSION['selected_images'] : array();
+ 
 
 get_header();
 ?>
 
-<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data">
+<form method="POST" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" enctype="multipart/form-data">
     <input type="hidden" name="action" value="custom_contact_form">
     <div>
         <label for="name">Name:</label>
@@ -28,17 +29,17 @@ get_header();
         <input type="tel" name="phone" id="phone">
     </div>
     <div>
-            <label for="reference">Upload Image</label>
-            <input type="file" name="reference" id="reference">
+        <label for="reference">Upload Image</label>
+        <input type="file" name="reference" id="reference">
     </div>
     <div>
         <p>Select image(s):</p>
         <div class="imageContainer">
             <?php foreach ($selectedImages as $imageUrl) { ?>
-            <label class="imageCheckbox">
-                <input type="checkbox" name="selectedImages[]" value="<?php echo $imageUrl; ?>">
-                <img src="<?php echo $imageUrl; ?>" alt="Image">
-            </label>
+                <label class="imageCheckbox">
+                    <input type="checkbox" name="selectedImages[]" value="<?php echo $imageUrl; ?>">
+                    <img src="<?php echo $imageUrl; ?>" alt="Image">
+                </label>
             <?php } ?>
         </div>
     </div>
@@ -73,7 +74,7 @@ get_header();
         </select>
     </div>
     <div>
-        <button type="submit">Submit</button>
+        <input type="submit" id="submit" name="submit" value="Submit">
     </div>
 </form>
 
