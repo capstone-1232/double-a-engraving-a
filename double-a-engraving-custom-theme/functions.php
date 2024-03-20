@@ -176,10 +176,76 @@ if ( defined( 'JETPACK__VERSION' ) ) {
 	require get_template_directory() . '/inc/jetpack.php';
 }
 
-function enqueue_custom_styles() {
-    // Enqueue the stylesheet
-    wp_enqueue_style('custom-styles', get_template_directory_uri() . '/css/styles.css', array(), '1.0', 'all');
+
+
+
+
+
+add_action('admin_post_custom_contact_form', 'handle_custom_contact_form');
+add_action('admin_post_nopriv_custom_contact_form', 'handle_custom_contact_form');
+
+function handle_custom_contact_form() {
+    $name = sanitize_text_field($_POST['name']);
+    $email = sanitize_email($_POST['email']);
+    $phone = sanitize_text_field($_POST['phone']);
+    $message = sanitize_textarea_field($_POST['message']);
+    $materials = sanitize_text_field($_POST['materials']);
+    $finish = sanitize_text_field($_POST['finish']);
+    $deliver = sanitize_text_field($_POST['deliver']);
+
+    $to = 'speedybatm12@gmail.com';
+    $subject = 'New Custom Form Submission';
+    $body = "Name: $name<br>Email: $email<br>Phone: $phone<br>Message: $message<br>Materials: $materials<br>Finish: $finish<br>Delivery Method: $deliver";
+
+    $attachments = array();
+
+    if (!empty($_FILES['reference']['tmp_name'])) {
+        $reference = $_FILES['reference'];
+        $upload_overrides = array('test_form' => false);
+        $movefile = wp_handle_upload($reference, $upload_overrides);
+        if ($movefile && !isset($movefile['error'])) {
+            $attachment = $movefile['file'];
+            $attachments[] = $attachment;
+        }
+    }
+
+    if (isset($_POST['selectedImages']) && is_array($_POST['selectedImages'])) {
+        $upload_dir = wp_upload_dir();
+        $temp_dir = $upload_dir['basedir'] . '/custom_contact_temp/';
+
+        if (!file_exists($temp_dir)) {
+            mkdir($temp_dir, 0755, true);
+        }
+
+        foreach ($_POST['selectedImages'] as $imageUrl) {
+            $image_path = str_replace(home_url(), ABSPATH, $imageUrl);
+            $image_name = basename($image_path);
+            $copied_image_path = $temp_dir . $image_name;
+
+            if (copy($image_path, $copied_image_path)) {
+                $attachments[] = $copied_image_path;
+            }
+        }
+    }
+
+    $headers = array('Content-Type: text/html; charset=UTF-8');
+
+    $result = wp_mail($to, $subject, $body, $headers, $attachments);
+
+    foreach ($attachments as $attachment) {
+        @unlink($attachment);
+    }
+
+    if ($result) {
+        echo '<p>Message sent successfully!</p>';
+		wp_redirect(home_url('/?status=success'));
+    } else {
+        echo '<p>Failed to send message. Please try again later.</p>';
+		wp_redirect(home_url('/?status=error'));
+    }
+    exit;
 }
-add_action('wp_enqueue_scripts', 'enqueue_custom_styles');
+
+
 
 
