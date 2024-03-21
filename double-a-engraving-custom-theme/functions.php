@@ -184,67 +184,111 @@ if ( defined( 'JETPACK__VERSION' ) ) {
 add_action('admin_post_custom_contact_form', 'handle_custom_contact_form');
 add_action('admin_post_nopriv_custom_contact_form', 'handle_custom_contact_form');
 
-function handle_custom_contact_form() {
+function handle_custom_contact_form()
+{
     $name = sanitize_text_field($_POST['name']);
     $email = sanitize_email($_POST['email']);
     $phone = sanitize_text_field($_POST['phone']);
-    $message = sanitize_textarea_field($_POST['message']);
-    $materials = sanitize_text_field($_POST['materials']);
-    $finish = sanitize_text_field($_POST['finish']);
     $deliver = sanitize_text_field($_POST['deliver']);
 
-    $to = 'speedybatm12@gmail.com';
-    $subject = 'New Custom Form Submission';
-    $body = "Name: $name<br>Email: $email<br>Phone: $phone<br>Message: $message<br>Materials: $materials<br>Finish: $finish<br>Delivery Method: $deliver";
+    $orders = array();
+
+    $original_order = array(
+        'reference' => $_FILES['reference']['name'],
+        'message' => sanitize_textarea_field($_POST['message']),
+        'materials' => sanitize_text_field($_POST['materials']),
+        'finish' => sanitize_text_field($_POST['finish'])
+    );
+    $orders[] = $original_order;
 
     $attachments = array();
-
     if (!empty($_FILES['reference']['tmp_name'])) {
-        $reference = $_FILES['reference'];
-        $upload_overrides = array('test_form' => false);
-        $movefile = wp_handle_upload($reference, $upload_overrides);
-        if ($movefile && !isset($movefile['error'])) {
-            $attachment = $movefile['file'];
-            $attachments[] = $attachment;
-        }
-    }
-
-    if (isset($_POST['selectedImages']) && is_array($_POST['selectedImages'])) {
-        $upload_dir = wp_upload_dir();
-        $temp_dir = $upload_dir['basedir'] . '/custom_contact_temp/';
-
-        if (!file_exists($temp_dir)) {
-            mkdir($temp_dir, 0755, true);
-        }
-
-        foreach ($_POST['selectedImages'] as $imageUrl) {
-            $image_path = str_replace(home_url(), ABSPATH, $imageUrl);
-            $image_name = basename($image_path);
-            $copied_image_path = $temp_dir . $image_name;
-
-            if (copy($image_path, $copied_image_path)) {
-                $attachments[] = $copied_image_path;
-            }
-        }
-    }
-
-    $headers = array('Content-Type: text/html; charset=UTF-8');
-
-    $result = wp_mail($to, $subject, $body, $headers, $attachments);
-
-    foreach ($attachments as $attachment) {
-        @unlink($attachment);
-    }
-
-    if ($result) {
-        echo '<p>Message sent successfully!</p>';
+		$reference = $_FILES['reference'];
+		$upload_overrides = array('test_form' => false);
+		$movefile = wp_handle_upload($reference, $upload_overrides);
+		if ($movefile && !isset($movefile['error'])) {
+			$attachment = $movefile['file'];
+			$attachment_name = 'Order 1 - ' . $original_order['reference']; // Renaming the attachment
+			$attachments[$attachment_name] = $attachment; // Store the attachment with the new name
+		}
+	}
+	
+	if (isset($_POST['selectedImages']) && is_array($_POST['selectedImages'])) {
+		$upload_dir = wp_upload_dir();
+		$temp_dir = $upload_dir['basedir'] . '/custom_contact_temp/';
+	
+		if (!file_exists($temp_dir)) {
+			mkdir($temp_dir, 0755, true);
+		}
+	
+		foreach ($_POST['selectedImages'] as $imageUrl) {
+			$image_path = str_replace(home_url(), ABSPATH, $imageUrl);
+			$image_name = basename($image_path);
+			$copied_image_path = $temp_dir . $image_name;
+			if (copy($image_path, $copied_image_path)) {
+				$attachment_name = 'Order 1 - ' . $image_name; // Renaming the attachment
+				$attachments[$attachment_name] = $copied_image_path; // Store the attachment with the new name
+			}
+		}
+	}
+	
+	foreach ($_POST as $key => $value) {
+		if (strpos($key, 'message_') !== false || strpos($key, 'materials_') !== false || strpos($key, 'finish_') !== false) {
+			$order_number = explode('_', $key)[1];
+			if (!isset($orders[$order_number])) {
+				$orders[$order_number] = array();
+			}
+			$orders[$order_number]['message'] = sanitize_textarea_field($_POST['message_' . $order_number]);
+			$orders[$order_number]['materials'] = sanitize_text_field($_POST['materials_' . $order_number]);
+			$orders[$order_number]['finish'] = sanitize_text_field($_POST['finish_' . $order_number]);
+	
+			if (!empty($_FILES['reference_' . $order_number]['tmp_name'])) {
+				$reference = $_FILES['reference_' . $order_number];
+				$upload_overrides = array('test_form' => false);
+				$movefile = wp_handle_upload($reference, $upload_overrides);
+				if ($movefile && !isset($movefile['error'])) {
+					$attachment = $movefile['file'];
+					$attachment_name = 'Order ' . ($order_number + 1) . ' - ' . $_FILES['reference_' . $order_number]['name']; // Renaming the attachment
+					$attachments[$attachment_name] = $attachment; // Store the attachment with the new name
+				}
+			}
+		}
+	}
+	
+	$to = 'speedybatm12@gmail.com';
+	$subject = 'New Custom Form Submission';
+	
+	$body = "Name: $name\nEmail: $email\nPhone: $phone\nDelivery Method: $deliver\n\n";
+	
+	foreach ($orders as $order) {
+		$body .= "Order Details:\n";
+		$body .= "Reference: " . $original_order['reference'] . "\n";
+		$body .= "Message: " . $order['message'] . "\n";
+		$body .= "Materials: " . $order['materials'] . "\n";
+		$body .= "Finish: " . $order['finish'] . "\n\n";
+	}
+	
+	$headers = array('Content-Type: text/plain; charset=UTF-8');
+	
+	$result = wp_mail($to, $subject, $body, $headers, $attachments);
+	
+	foreach ($attachments as $attachment) {
+		@unlink($attachment);
+	}
+	
+	if ($result) {
 		wp_redirect(home_url('/?status=success'));
-    } else {
-        echo '<p>Failed to send message. Please try again later.</p>';
+	} else {
 		wp_redirect(home_url('/?status=error'));
-    }
-    exit;
-}
+	}
+	exit;
+	}
+	
+
+
+
+
+
 
 
 
